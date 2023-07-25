@@ -2,7 +2,10 @@
 
 Vectoraudio_socket::Vectoraudio_socket()
 {
-    initHandles();
+    if (init_handles() != 0) {
+        error_state = true;
+        last_error = "Could not initialize curl";
+    }
 }
 
 Vectoraudio_socket::~Vectoraudio_socket()
@@ -15,7 +18,12 @@ Vectoraudio_socket::~Vectoraudio_socket()
 
 const bool Vectoraudio_socket::has_error() const
 {
-    return errorState;
+    return error_state;
+}
+
+const std::string& Vectoraudio_socket::error_msg() const
+{
+    return last_error;
 }
 
 const bool Vectoraudio_socket::rx_changed() const
@@ -38,42 +46,46 @@ const frequency_pairs& Vectoraudio_socket::get_tx()
     return tx_freqs.get();
 }
 
-int Vectoraudio_socket::poll()
+void Vectoraudio_socket::poll()
 {
+    if (error_state)
+        return;
+
     CURLMsg* msg { nullptr };
     int msgq { 0 };
     while ((msg = curl_multi_info_read(curl, &msgq))) {
+        CURL* hnd = msg->easy_handle;
         if (msg->msg == CURLMSG_DONE) {
-            CURL* hnd = msg->easy_handle;
-            handleReply(hnd);
+            if (msg->data.result == CURLE_OK) {
+                handle_reply(hnd);
+            }
+
+            Active_frequencies* freqs { nullptr };
+            curl_easy_getinfo(hnd, CURLINFO_PRIVATE, &freqs);
+            freqs->clear();
             curl_multi_remove_handle(curl, hnd);
             curl_multi_add_handle(curl, hnd);
         }
     }
     int runningHandles { 0 };
     curl_multi_perform(curl, &runningHandles);
-    return 0;
 }
 
-int Vectoraudio_socket::handleReply(CURL* handle)
+int Vectoraudio_socket::handle_reply(CURL* handle)
 {
     long code;
-    auto res = curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &code);
-    Active_frequencies* fHandle { nullptr };
-    if (handle == rx_handle)
-        fHandle = &rx_freqs;
-    if (handle == tx_handle)
-        fHandle = &tx_freqs;
-    
-    if (!fHandle)
+    if (curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &code) != CURLE_OK)
         return 1;
-    if (res != CURLE_OK || code != 200) {
-        fHandle->clear();
+    if (code != 200) {
         return 1;
     }
 
-    frequency_pairs pairs = parse_reply(fHandle->curl_buffer);
-    fHandle->set(pairs);
+    Active_frequencies* freqs { nullptr };
+    curl_easy_getinfo(handle, CURLINFO_PRIVATE, &freqs);
+    if (freqs) {
+        frequency_pairs pairs = parse_reply(freqs->curl_buffer);
+        freqs->set(pairs);
+    }
 
     return 0;
 }
@@ -102,23 +114,24 @@ frequency_pairs Vectoraudio_socket::parse_reply(const std::string& reply) const
     return freqs;
 }
 
-int Vectoraudio_socket::initHandles()
+CURL* Vectoraudio_socket::easy_init(const std::string& url, Active_frequencies& freqs, callback_t call)
 {
-    auto res = curl_global_init(CURL_GLOBAL_ALL);
-    if (res == 0)
-        errorState = false;
+    auto curl = curl_easy_init();
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, call);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &freqs.curl_buffer);
+    curl_easy_setopt(curl, CURLOPT_PRIVATE, &freqs);
+    return curl;
+}
+
+int Vectoraudio_socket::init_handles()
+{
+    if (curl_global_init(CURL_GLOBAL_ALL) != 0)
+        return 1;
     curl = curl_multi_init();
-
-    rx_handle = curl_easy_init();
-    curl_easy_setopt(rx_handle, CURLOPT_URL, rx_url.c_str());
-    curl_easy_setopt(rx_handle, CURLOPT_WRITEFUNCTION, callback);
-    curl_easy_setopt(rx_handle, CURLOPT_WRITEDATA, &rx_freqs.curl_buffer);
-    curl_multi_add_handle(curl, rx_handle);
-
-    tx_handle = curl_easy_init();
-    curl_easy_setopt(tx_handle, CURLOPT_URL, tx_url.c_str());
-    curl_easy_setopt(tx_handle, CURLOPT_WRITEFUNCTION, callback);
-    curl_easy_setopt(tx_handle, CURLOPT_WRITEDATA, &tx_freqs.curl_buffer);
+    rx_handle = easy_init(rx_url, rx_freqs, write_callback);
+    auto res = curl_multi_add_handle(curl, rx_handle);
+    tx_handle = easy_init(tx_url, tx_freqs, write_callback);
     curl_multi_add_handle(curl, tx_handle);
     return 0;
 }
