@@ -2,6 +2,7 @@
 #include "Active_frequencies.h"
 #include <algorithm>
 #include <curl/curl.h>
+#include <exception>
 #include <string>
 #include <utility>
 #include <vector>
