@@ -3,6 +3,8 @@
 Vectoraudio_bridge::Vectoraudio_bridge()
     : EuroScopePlugIn::CPlugIn(EuroScopePlugIn::COMPATIBILITY_CODE, pluginName, pluginVersion, pluginAuthor, pluginCopyright)
 {
+    if (socket.has_error())
+        display_message(socket.error_msg());
 }
 
 Vectoraudio_bridge::~Vectoraudio_bridge()
@@ -50,12 +52,10 @@ bool Vectoraudio_bridge::OnCompileCommand(const char* sCommandLine)
 
 void Vectoraudio_bridge::OnTimer(int counter)
 {
-    if (!active)
+    if (!active || socket.has_error())
         return;
 
-    if (!socket.has_error())
-        socket.poll();
-
+    socket.poll();
     if (socket.rx_changed()) {
         set_frequencies(socket.get_rx(), false);
     }

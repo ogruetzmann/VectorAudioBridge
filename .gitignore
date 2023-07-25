@@ -362,3 +362,7 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /VectorAudioBridge/SectorFileProviderDescriptor.txt
+/VectorAudioBridge/version.txt
+/VectorAudioBridge/euroscope_sector_providers.txt
+/VectorAudioBridge/ipaddr.txt
+/VectorAudioBridge/libcurl_debug.dll
