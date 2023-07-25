@@ -7,7 +7,7 @@
 namespace {
 const char* pluginName = "VectorAudioBridge";
 const char* pluginAuthor = "Oliver Gruetzmann";
-const char* pluginVersion = "0.1";
+const char* pluginVersion = "0.2";
 const char* pluginCopyright = "MIT License";
 }
 
