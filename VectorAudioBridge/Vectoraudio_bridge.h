@@ -1,6 +1,8 @@
 #pragma once
 #include "Vectoraudio_Socket.h"
 #include <EuroScopePlugIn.h>
+#include <functional>
+#include <memory>
 #include <string>
 #include <string_view>
 
@@ -16,7 +18,7 @@ using namespace EuroScopePlugIn;
 class Vectoraudio_bridge : public EuroScopePlugIn::CPlugIn {
 public:
     Vectoraudio_bridge();
-    virtual ~Vectoraudio_bridge();
+    ~Vectoraudio_bridge();
     void display_message(std::string_view msg);
     void set_frequencies(const frequency_pairs& pairs, const bool tx);
 
@@ -25,5 +27,5 @@ public:
 
 private:
     bool active { true };
-    Vectoraudio_socket socket;
+    std::unique_ptr<Vectoraudio_socket> socket;
 };

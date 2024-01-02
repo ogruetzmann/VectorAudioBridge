@@ -3,8 +3,13 @@
 Vectoraudio_bridge::Vectoraudio_bridge()
     : EuroScopePlugIn::CPlugIn(EuroScopePlugIn::COMPATIBILITY_CODE, pluginName, pluginVersion, pluginAuthor, pluginCopyright)
 {
-    if (socket.has_error())
-        display_message(socket.error_msg());
+    auto msg = [this](const std::string type, const std::string msg) { DisplayUserMessage("VectorAudioBridge", type.c_str(), msg.c_str(), true, false, false, false, false); };
+
+    try {
+        socket = std::make_unique<Vectoraudio_socket>(msg);
+    } catch (std::exception& e) {
+        display_message(e.what());
+    }
 }
 
 Vectoraudio_bridge::~Vectoraudio_bridge()
@@ -36,13 +41,13 @@ void Vectoraudio_bridge::set_frequencies(const frequency_pairs& pairs, const boo
 
 bool Vectoraudio_bridge::OnCompileCommand(const char* sCommandLine)
 {
-    const std::string_view cmd = sCommandLine;
-    if (cmd.starts_with(".vab start")) {
+    std::string_view cmd = sCommandLine;
+    if (cmd == ".vab start") {
         active = true;
         display_message("Brigde active");
         return true;
     }
-    if (cmd.starts_with(".vab stop")) {
+    if (cmd == ".vab stop") {
         display_message("Brigde inactive");
         active = false;
         return true;
@@ -52,14 +57,27 @@ bool Vectoraudio_bridge::OnCompileCommand(const char* sCommandLine)
 
 void Vectoraudio_bridge::OnTimer(int counter)
 {
-    if (!active || socket.has_error())
-        return;
+    if (socket && active && !socket->has_error()) {
+        // try {
+        //     socket->poll();
+        // } catch (std::exception& e) {
+        //     display_message(e.what());
+        // }
+        // if (socket->rx_changed())
+        //     set_frequencies(socket->get_rx(), false);
+        // if (socket->tx_changed())
+        //     set_frequencies(socket->get_tx(), true);
+    }
+}
 
-    socket.poll();
-    if (socket.rx_changed()) {
-        set_frequencies(socket.get_rx(), false);
-    }
-    if (socket.tx_changed()) {
-        set_frequencies(socket.get_tx(), true);
-    }
+std::unique_ptr<EuroScopePlugIn::CPlugIn> plugin;
+
+void EuroScopePlugInInit(EuroScopePlugIn::CPlugIn** ppPlugInInstance)
+{
+    plugin.reset(new Vectoraudio_bridge);
+    *ppPlugInInstance = plugin.get();
+}
+
+void EuroScopePlugInExit(void)
+{
 }

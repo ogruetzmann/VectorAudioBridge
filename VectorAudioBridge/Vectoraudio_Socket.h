@@ -1,17 +1,21 @@
 #pragma once
+
 #include "Active_frequencies.h"
-#include <algorithm>
+#include <chrono>
 #include <curl/curl.h>
-#include <exception>
+#include <functional>
+#include <stop_token>
 #include <string>
+#include <thread>
 #include <utility>
 #include <vector>
 
 using frequency_pairs = std::vector<std::pair<std::string, std::string>>;
+using namespace std::chrono_literals;
 
 class Vectoraudio_socket {
 public:
-    Vectoraudio_socket();
+    Vectoraudio_socket(std::function<void(std::string, std::string)> msg);
     ~Vectoraudio_socket();
 
     const bool has_error() const;
@@ -21,9 +25,11 @@ public:
     const frequency_pairs& get_rx();
     const frequency_pairs& get_tx();
     void poll();
+    void ping();
 
 private:
     bool error_state { false };
+    bool connected { false };
     std::string last_error;
 
     Active_frequencies rx_freqs {};
@@ -31,10 +37,18 @@ private:
 
     CURL* rx_handle { nullptr };
     CURL* tx_handle { nullptr };
-    CURLM* curl { nullptr };
-    const std::string rx_url = "http://localhost:49080/rx";
-    const std::string tx_url = "http://localhost:49080/tx";
+    CURL* active_handle { nullptr };
+    CURLM* curlm { nullptr };
 
+    const std::string rx_url { "http://localhost:49080/rx" };
+    const std::string tx_url { "http://localhost:49080/tx" };
+    const std::string status_url { "http://localhost:49080/" };
+    const std::string active_url { "http://localhost:49080/transmitting" };
+
+    std::stop_source worker_stop;
+    std::function<void(std::string, std::string)> display_message;
+
+    void run(std::stop_token token, int interval);
     int handle_reply(CURL* handle);
     frequency_pairs parse_reply(const std::string& reply) const;
 
@@ -47,5 +61,6 @@ private:
     };
 
     CURL* easy_init(const std::string& url, Active_frequencies& freqs, callback_t call);
-    int init_handles();
+    void init_curl();
+    void init_handles();
 };

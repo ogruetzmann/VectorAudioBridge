@@ -21,20 +21,23 @@
     <ClInclude Include="Vectoraudio_bridge.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="include\EuroScopePlugIn.h">
-      <Filter>Headerdateien\Include</Filter>
-    </ClInclude>
     <ClInclude Include="Vectoraudio_Socket.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="Active_frequencies.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="include\curl\curl.h">
+      <Filter>Headerdateien\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\AppData\Roaming\EuroScope\PlugIn\EuroScopePlugIn.h">
+      <Filter>Headerdateien\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Frequency.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="PluginMain.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
     <ClCompile Include="Vectoraudio_bridge.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
