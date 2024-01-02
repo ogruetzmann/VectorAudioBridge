@@ -91,13 +91,13 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>C:\Users\ogrue\AppData\Roaming\EuroScope\PlugIn;C:\Users\ogrue\source\repos\VectorAudioBridge\VectorAudioBridge\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\ogrue\AppData\Roaming\EuroScope\PlugIn;C:\Users\ogrue\source\repos\ogruetzmann\VectorAudioBridge\VectorAudioBridge\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\ogrue\AppData\Roaming\EuroScope\PlugIn;C:\Users\ogrue\source\repos\VectorAudioBridge\VectorAudioBridge\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>EuroScopePlugInDll.lib;libcurl_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\ogrue\AppData\Roaming\EuroScope\PlugIn;C:\Users\ogrue\source\repos\ogruetzmann\VectorAudioBridge\VectorAudioBridge\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>EuroScopePlugInDll.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -110,14 +110,14 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>C:\Users\ogrue\AppData\Roaming\EuroScope\PlugIn;C:\Users\ogrue\source\repos\VectorAudioBridge\VectorAudioBridge\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\ogrue\AppData\Roaming\EuroScope\PlugIn;C:\Users\ogrue\source\repos\ogruetzmann\VectorAudioBridge\VectorAudioBridge\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\ogrue\AppData\Roaming\EuroScope\PlugIn;C:\Users\ogrue\source\repos\VectorAudioBridge\VectorAudioBridge\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\ogrue\AppData\Roaming\EuroScope\PlugIn;C:\Users\ogrue\source\repos\ogruetzmann\VectorAudioBridge\VectorAudioBridge\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>EuroScopePlugInDll.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -129,13 +129,13 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>C:\Users\ogrue\AppData\Roaming\EuroScope\PlugIn;C:\Users\ogrue\source\repos\VectorAudioBridge\VectorAudioBridge\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\ogrue\AppData\Roaming\EuroScope\PlugIn;C:\Users\ogrue\source\repos\ogruetzmann\VectorAudioBridge\VectorAudioBridge\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\ogrue\AppData\Roaming\EuroScope\PlugIn;C:\Users\ogrue\source\repos\VectorAudioBridge\VectorAudioBridge\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>EuroScopePlugInDll.lib;libcurl_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\ogrue\AppData\Roaming\EuroScope\PlugIn;C:\Users\ogrue\source\repos\ogruetzmann\VectorAudioBridge\VectorAudioBridge\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>EuroScopePlugInDll.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -148,27 +148,30 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>C:\Users\ogrue\AppData\Roaming\EuroScope\PlugIn;C:\Users\ogrue\source\repos\VectorAudioBridge\VectorAudioBridge\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\ogrue\AppData\Roaming\EuroScope\PlugIn;C:\Users\ogrue\source\repos\ogruetzmann\VectorAudioBridge\VectorAudioBridge\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\ogrue\AppData\Roaming\EuroScope\PlugIn;C:\Users\ogrue\source\repos\VectorAudioBridge\VectorAudioBridge\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\ogrue\AppData\Roaming\EuroScope\PlugIn;C:\Users\ogrue\source\repos\ogruetzmann\VectorAudioBridge\VectorAudioBridge\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>EuroScopePlugInDll.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\AppData\Roaming\EuroScope\PlugIn\EuroScopePlugIn.h" />
     <ClInclude Include="Active_frequencies.h" />
+    <ClInclude Include="Curl_buffer.h" />
     <ClInclude Include="Frequency.h" />
     <ClInclude Include="include\curl\curl.h" />
+    <ClInclude Include="Status.h" />
     <ClInclude Include="Vectoraudio_bridge.h" />
     <ClInclude Include="Vectoraudio_Socket.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Active_frequencies.cpp" />
+    <ClCompile Include="Status.cpp" />
     <ClCompile Include="Vectoraudio_bridge.cpp" />
     <ClCompile Include="Vectoraudio_Socket.cpp" />
   </ItemGroup>

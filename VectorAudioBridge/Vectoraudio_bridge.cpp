@@ -28,7 +28,7 @@ void Vectoraudio_bridge::set_frequencies(const frequency_pairs& pairs, const boo
         std::string_view name = gac.GetName();
 
         bool found { false };
-        auto compare = [&](std::pair<std::string, std::string> p) { return name.starts_with(p.first) && frequency.starts_with(p.second); };
+        auto compare = [&](Frequency p) { return name.starts_with(p.name) && frequency.starts_with(p.frequency); };
         if (std::find_if(pairs.begin(), pairs.end(), compare) != pairs.end())
             found = true;
 
@@ -57,17 +57,6 @@ bool Vectoraudio_bridge::OnCompileCommand(const char* sCommandLine)
 
 void Vectoraudio_bridge::OnTimer(int counter)
 {
-    if (socket && active && !socket->has_error()) {
-        // try {
-        //     socket->poll();
-        // } catch (std::exception& e) {
-        //     display_message(e.what());
-        // }
-        // if (socket->rx_changed())
-        //     set_frequencies(socket->get_rx(), false);
-        // if (socket->tx_changed())
-        //     set_frequencies(socket->get_tx(), true);
-    }
 }
 
 std::unique_ptr<EuroScopePlugIn::CPlugIn> plugin;

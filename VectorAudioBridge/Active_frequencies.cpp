@@ -1,12 +1,14 @@
 #include "Active_frequencies.h"
 
-const bool Active_frequencies::is_changed() const
+const bool Active_frequencies::is_changed()
 {
+    std::lock_guard<std::mutex> guard(lock);
     return changed;
 }
 
 const frequency_pairs& Active_frequencies::get()
 {
+    std::lock_guard<std::mutex> guard(lock);
     changed = false;
     return pairs;
 }
@@ -14,6 +16,7 @@ const frequency_pairs& Active_frequencies::get()
 void Active_frequencies::set(frequency_pairs& p)
 {
     if (p != pairs) {
+        std::lock_guard<std::mutex> guard(lock);
         pairs.swap(p);
         changed = true;
     }

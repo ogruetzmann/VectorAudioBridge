@@ -36,6 +36,12 @@
     <ClInclude Include="Frequency.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="Curl_buffer.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Status.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vectoraudio_bridge.cpp">
@@ -45,6 +51,9 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="Active_frequencies.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="Status.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

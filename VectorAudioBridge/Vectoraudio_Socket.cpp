@@ -1,6 +1,7 @@
 #include "Vectoraudio_Socket.h"
 
-Vectoraudio_socket::Vectoraudio_socket(std::function<void(std::string, std::string)> msg)
+Vectoraudio_socket::Vectoraudio_socket(
+    std::function<void(std::string, std::string)> msg)
     : display_message(msg)
 {
     init_curl();
@@ -23,20 +24,15 @@ Vectoraudio_socket::~Vectoraudio_socket()
 
 const bool Vectoraudio_socket::has_error() const
 {
-    return error_state;
+    return false;
 }
 
-const std::string& Vectoraudio_socket::error_msg() const
-{
-    return last_error;
-}
-
-const bool Vectoraudio_socket::rx_changed() const
+const bool Vectoraudio_socket::rx_changed()
 {
     return rx_freqs.is_changed();
 }
 
-const bool Vectoraudio_socket::tx_changed() const
+const bool Vectoraudio_socket::tx_changed()
 {
     return tx_freqs.is_changed();
 }
@@ -56,7 +52,7 @@ void Vectoraudio_socket::poll()
     if (error_state)
         return;
 
-    CURLMsg* msg { nullptr };
+    CURLMsg* msg{ nullptr };
     int msgq = 0;
     do {
         msg = curl_multi_info_read(curlm, &msgq);
@@ -68,7 +64,7 @@ void Vectoraudio_socket::poll()
         }
     } while (msg);
 
-    int runningHandles { 0 };
+    int runningHandles{ 0 };
     curl_multi_perform(curlm, &runningHandles);
 }
 
@@ -80,25 +76,23 @@ void Vectoraudio_socket::run(std::stop_token token, int interval_ms)
 {
     using clock = std::chrono::system_clock;
     clock::time_point start, now;
-    const clock::duration interval = std::chrono::milliseconds(200);
     while (!token.stop_requested()) {
         now = clock::now();
-        if (start.time_since_epoch() == clock::duration::zero() || now - start > interval) {
+        if (start.time_since_epoch() == clock::duration::zero() || now - start > status.interval)
+        {
             poll();
+            start = clock::now();
         }
-        std::this_thread::sleep_for(10ms);
     }
-    int i = 0;
 }
 
 int Vectoraudio_socket::handle_reply(CURL* handle)
 {
-    Active_frequencies* freqs { nullptr };
+    Active_frequencies* freqs{ nullptr };
     curl_easy_getinfo(handle, CURLINFO_PRIVATE, &freqs);
 
     long code;
     if (curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &code) == CURLE_OK && code == 200) {
-
         if (freqs) {
             frequency_pairs pairs = parse_reply(freqs->curl_buffer);
             freqs->set(pairs);
@@ -111,7 +105,7 @@ int Vectoraudio_socket::handle_reply(CURL* handle)
 
 frequency_pairs Vectoraudio_socket::parse_reply(const std::string& reply) const
 {
-    std::vector<std::pair<std::string, std::string>> freqs;
+    std::vector<Frequency> freqs;
 
     if (!reply.size())
         return freqs;
@@ -125,7 +119,8 @@ frequency_pairs Vectoraudio_socket::parse_reply(const std::string& reply) const
         std::string_view token = std::string_view(begin, end);
 
         auto pos = std::find(token.begin(), token.end(), pos_sep);
-        freqs.push_back({ std::string { token.begin(), pos }, std::string { pos + 1, token.end() } });
+        freqs.push_back({ std::string { token.begin(), pos },
+            std::string { pos + 1, token.end() } });
 
         if (end != reply.end())
             begin = ++end;
@@ -133,11 +128,18 @@ frequency_pairs Vectoraudio_socket::parse_reply(const std::string& reply) const
     return freqs;
 }
 
-CURL* Vectoraudio_socket::easy_init(const std::string& url, Active_frequencies& freqs, callback_t call)
+//auto write_callback = +[](char* ptr, size_t size, size_t nmemb, std::string* userdata) -> size_t {
+//    if (userdata == nullptr)
+//        return 0;
+//    userdata->append(ptr, size * nmemb);
+//    return size * nmemb;
+//    };
+
+CURL* Vectoraudio_socket::easy_init(const std::string& url, Active_frequencies& freqs)
 {
     auto curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, call);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &freqs.curl_buffer);
     curl_easy_setopt(curl, CURLOPT_PRIVATE, &freqs);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 1000);
@@ -157,8 +159,17 @@ void Vectoraudio_socket::init_curl()
 
 void Vectoraudio_socket::init_handles()
 {
-    rx_handle = easy_init(rx_url, rx_freqs, write_callback);
+    rx_handle = easy_init(rx_url, rx_freqs);
     curl_multi_add_handle(curlm, rx_handle);
-    tx_handle = easy_init(tx_url, tx_freqs, write_callback);
+    tx_handle = easy_init(tx_url, tx_freqs);
     curl_multi_add_handle(curlm, tx_handle);
 }
+
+size_t write_callback(char* ptr, size_t size, size_t nmemb, std::string* userdata)
+{
+    if (userdata == nullptr)
+        return 0;
+    userdata->append(ptr, size * nmemb);
+    return size * nmemb;
+};
+
