@@ -14,10 +14,9 @@ Vectoraudio_socket::Vectoraudio_socket(
 Vectoraudio_socket::~Vectoraudio_socket()
 {
     worker_stop.request_stop();
-    curl_multi_remove_handle(curlm, rx_handle);
-    curl_multi_remove_handle(curlm, tx_handle);
-    curl_easy_cleanup(rx_handle);
-    curl_easy_cleanup(tx_handle);
+    for (auto& x : handles)
+        curl_multi_remove_handle(curlm, x.get()->get_handle());
+    handles.clear();
     curl_multi_cleanup(curlm);
     curl_global_cleanup();
 }
@@ -52,7 +51,7 @@ void Vectoraudio_socket::poll()
     if (error_state)
         return;
 
-    CURLMsg* msg{ nullptr };
+    CURLMsg* msg { nullptr };
     int msgq = 0;
     do {
         msg = curl_multi_info_read(curlm, &msgq);
@@ -64,7 +63,7 @@ void Vectoraudio_socket::poll()
         }
     } while (msg);
 
-    int runningHandles{ 0 };
+    int runningHandles { 0 };
     curl_multi_perform(curlm, &runningHandles);
 }
 
@@ -78,35 +77,47 @@ void Vectoraudio_socket::run(std::stop_token token, int interval_ms)
     clock::time_point start, now;
     while (!token.stop_requested()) {
         now = clock::now();
-        if (start.time_since_epoch() == clock::duration::zero() || now - start > status.interval)
-        {
+        if (start.time_since_epoch() == clock::duration::zero() || now - start > status.interval) {
             poll();
             start = clock::now();
         }
+        std::this_thread::sleep_for(20ms);
     }
 }
 
 int Vectoraudio_socket::handle_reply(CURL* handle)
 {
-    Active_frequencies* freqs{ nullptr };
-    curl_easy_getinfo(handle, CURLINFO_PRIVATE, &freqs);
-
-    long code;
-    if (curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &code) == CURLE_OK && code == 200) {
-        if (freqs) {
-            frequency_pairs pairs = parse_reply(freqs->curl_buffer);
-            freqs->set(pairs);
-        }
+    CURL_easy_handler* handler { nullptr };
+    curl_easy_getinfo(handle, CURLINFO_PRIVATE, &handler);
+    if (!handler)
+        return -1;
+    auto code = handler->get_response_code();
+    if (code != 200) {
+        status.disconnected();
+        return -1;
     }
+    status.connected();
 
-    freqs->clear();
+    auto type = handler->get_type();
+    frequency_pairs pairs;
+    switch (type) {
+    case CURL_easy_handler::handle_type::rx:
+        rx_freqs.set(parse_reply(handler->get_response()));
+        break;
+    case CURL_easy_handler::handle_type::tx:
+        tx_freqs.set(parse_reply(handler->get_response()));
+        break;
+    case CURL_easy_handler::handle_type::active:
+        break;
+    case CURL_easy_handler::handle_type::version:
+        break;
+    }
     return 0;
 }
 
-frequency_pairs Vectoraudio_socket::parse_reply(const std::string& reply) const
+frequency_pairs Vectoraudio_socket::parse_reply(std::string_view reply) const
 {
     std::vector<Frequency> freqs;
-
     if (!reply.size())
         return freqs;
 
@@ -128,23 +139,13 @@ frequency_pairs Vectoraudio_socket::parse_reply(const std::string& reply) const
     return freqs;
 }
 
-//auto write_callback = +[](char* ptr, size_t size, size_t nmemb, std::string* userdata) -> size_t {
-//    if (userdata == nullptr)
-//        return 0;
-//    userdata->append(ptr, size * nmemb);
-//    return size * nmemb;
-//    };
+// auto write_callback = +[](char* ptr, size_t size, size_t nmemb, std::string* userdata) -> size_t {
+//     if (userdata == nullptr)
+//         return 0;
+//     userdata->append(ptr, size * nmemb);
+//     return size * nmemb;
+//     };
 
-CURL* Vectoraudio_socket::easy_init(const std::string& url, Active_frequencies& freqs)
-{
-    auto curl = curl_easy_init();
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &freqs.curl_buffer);
-    curl_easy_setopt(curl, CURLOPT_PRIVATE, &freqs);
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 1000);
-    return curl;
-}
 
 void Vectoraudio_socket::init_curl()
 {
@@ -159,17 +160,17 @@ void Vectoraudio_socket::init_curl()
 
 void Vectoraudio_socket::init_handles()
 {
-    rx_handle = easy_init(rx_url, rx_freqs);
-    curl_multi_add_handle(curlm, rx_handle);
-    tx_handle = easy_init(tx_url, tx_freqs);
-    curl_multi_add_handle(curlm, tx_handle);
+    handles.push_back(std::make_unique<CURL_easy_handler>(CURL_easy_handler::handle_type::rx, rx_url));
+    handles.push_back(std::make_unique<CURL_easy_handler>(CURL_easy_handler::handle_type::tx, tx_url));
+    handles.push_back(std::make_unique<CURL_easy_handler>(CURL_easy_handler::handle_type::active, active_url));
+    for (auto& x : handles)
+        curl_multi_add_handle(curlm, x.get()->get_handle());
 }
 
-size_t write_callback(char* ptr, size_t size, size_t nmemb, std::string* userdata)
+size_t write_cb(char* ptr, size_t size, size_t nmemb, std::string* userdata)
 {
     if (userdata == nullptr)
         return 0;
     userdata->append(ptr, size * nmemb);
     return size * nmemb;
 };
-

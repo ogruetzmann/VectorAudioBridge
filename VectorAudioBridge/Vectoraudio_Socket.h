@@ -4,13 +4,15 @@
 #include <chrono>
 #include <curl/curl.h>
 #include <functional>
+#include <memory>
 #include <stop_token>
 #include <string>
 #include <thread>
 #include <utility>
 #include <vector>
-#include "Curl_buffer.h"
+//#include "Curl_buffer.h"
 #include "Status.h"
+#include "CURL_easy_handler.h"
 
 //using frequency_pairs = std::vector<std::pair<std::string, std::string>>;
 using namespace std::chrono_literals;
@@ -34,15 +36,10 @@ private:
     bool connected{ false };
     std::string last_error;
 
-    Curl_buffer rx_buffer{ Curl_buffer::type::rx };
-    Curl_buffer tx_buffer{ Curl_buffer::type::tx };
-    Curl_buffer ax_buffer{ Curl_buffer::type::active };
     Active_frequencies rx_freqs{};
     Active_frequencies tx_freqs{};
 
-    CURL* rx_handle{ nullptr };
-    CURL* tx_handle{ nullptr };
-    CURL* active_handle{ nullptr };
+    std::vector<std::unique_ptr<CURL_easy_handler>> handles;
     CURLM* curlm{ nullptr };
 
     const std::string rx_url{ "http://localhost:49080/rx" };
@@ -56,11 +53,10 @@ private:
 
     void run(std::stop_token token, int interval);
     int handle_reply(CURL* handle);
-    frequency_pairs parse_reply(const std::string& reply) const;
+    frequency_pairs parse_reply(std::string_view reply) const;
 
-    CURL* easy_init(const std::string& url, Active_frequencies& freqs);
     void init_curl();
     void init_handles();
 };
 
-size_t write_callback(char*, size_t, size_t, std::string*);
+size_t write_cb(char*, size_t, size_t, std::string*);

@@ -5,16 +5,13 @@
 
 #include "Frequency.h"
 
-//using frequency_pairs = std::vector<std::pair<std::string, std::string>>;
 using frequency_pairs = std::vector<Frequency>;
 
 class Active_frequencies {
-    friend class Vectoraudio_socket;
-
 public:
     const bool is_changed();
     const frequency_pairs& get();
-    void set(frequency_pairs& p);
+    void set(frequency_pairs&& p);
     void clear();
 
 private:

@@ -13,7 +13,7 @@ const frequency_pairs& Active_frequencies::get()
     return pairs;
 }
 
-void Active_frequencies::set(frequency_pairs& p)
+void Active_frequencies::set(frequency_pairs&& p)
 {
     if (p != pairs) {
         std::lock_guard<std::mutex> guard(lock);

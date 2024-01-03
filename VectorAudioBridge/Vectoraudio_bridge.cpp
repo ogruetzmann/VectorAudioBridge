@@ -4,6 +4,7 @@ Vectoraudio_bridge::Vectoraudio_bridge()
     : EuroScopePlugIn::CPlugIn(EuroScopePlugIn::COMPATIBILITY_CODE, pluginName, pluginVersion, pluginAuthor, pluginCopyright)
 {
     auto msg = [this](const std::string type, const std::string msg) { DisplayUserMessage("VectorAudioBridge", type.c_str(), msg.c_str(), true, false, false, false, false); };
+    auto frq_chg = [this](const frequency_pairs& p) { set_frequencies(p, false); };
 
     try {
         socket = std::make_unique<Vectoraudio_socket>(msg);
