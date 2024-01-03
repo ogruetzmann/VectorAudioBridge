@@ -36,10 +36,13 @@
     <ClInclude Include="Frequency.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="Curl_buffer.h">
+    <ClInclude Include="Status.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="Status.h">
+    <ClInclude Include="CURL_easy_handler.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Helpers.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
@@ -54,6 +57,12 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="Status.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="CURL_easy_handler.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="Helpers.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

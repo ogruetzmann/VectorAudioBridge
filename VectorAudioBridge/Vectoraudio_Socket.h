@@ -10,7 +10,6 @@
 #include <thread>
 #include <utility>
 #include <vector>
-//#include "Curl_buffer.h"
 #include "Status.h"
 #include "CURL_easy_handler.h"
 
@@ -48,8 +47,8 @@ private:
     const std::string active_url{ "http://localhost:49080/transmitting" };
 
     std::stop_source worker_stop;
-    std::function<void(std::string, std::string)> display_message;
-    std::function<void(const std::vector<Frequency>& rx, const std::vector<Frequency>& tx)> update_callback;
+    std::function<void(std::string, std::string)> message_callback;
+    std::function<void(const std::vector<Frequency>& rx, const std::vector<Frequency>& tx)> data_callback;
 
     void run(std::stop_token token, int interval);
     int handle_reply(CURL* handle);

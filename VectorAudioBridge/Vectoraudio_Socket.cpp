@@ -2,7 +2,7 @@
 
 Vectoraudio_socket::Vectoraudio_socket(
     std::function<void(std::string, std::string)> msg)
-    : display_message(msg)
+    : message_callback(msg)
 {
     init_curl();
     init_handles();
@@ -138,14 +138,6 @@ frequency_pairs Vectoraudio_socket::parse_reply(std::string_view reply) const
     } while (end != reply.end());
     return freqs;
 }
-
-// auto write_callback = +[](char* ptr, size_t size, size_t nmemb, std::string* userdata) -> size_t {
-//     if (userdata == nullptr)
-//         return 0;
-//     userdata->append(ptr, size * nmemb);
-//     return size * nmemb;
-//     };
-
 
 void Vectoraudio_socket::init_curl()
 {

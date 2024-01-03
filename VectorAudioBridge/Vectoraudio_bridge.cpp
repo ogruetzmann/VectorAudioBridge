@@ -8,7 +8,8 @@ Vectoraudio_bridge::Vectoraudio_bridge()
 
     try {
         socket = std::make_unique<Vectoraudio_socket>(msg);
-    } catch (std::exception& e) {
+    }
+    catch (std::exception& e) {
         display_message(e.what());
     }
 }
@@ -28,7 +29,7 @@ void Vectoraudio_bridge::set_frequencies(const frequency_pairs& pairs, const boo
         std::string frequency = std::to_string(gac.GetFrequency());
         std::string_view name = gac.GetName();
 
-        bool found { false };
+        bool found{ false };
         auto compare = [&](Frequency p) { return name.starts_with(p.name) && frequency.starts_with(p.frequency); };
         if (std::find_if(pairs.begin(), pairs.end(), compare) != pairs.end())
             found = true;
@@ -57,6 +58,14 @@ bool Vectoraudio_bridge::OnCompileCommand(const char* sCommandLine)
 }
 
 void Vectoraudio_bridge::OnTimer(int counter)
+{
+}
+
+void Vectoraudio_bridge::data_callback(const CURL_easy_handler::handle_type, const std::string data)
+{
+}
+
+void Vectoraudio_bridge::message_callback(const std::string sender, const std::string message, bool flash, bool unread)
 {
 }
 

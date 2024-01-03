@@ -7,10 +7,10 @@
 #include <string_view>
 
 namespace {
-const char* pluginName = "VectorAudioBridge";
-const char* pluginAuthor = "Oliver Gruetzmann";
-const char* pluginVersion = "0.2";
-const char* pluginCopyright = "MIT License";
+    const char* pluginName = "VectorAudioBridge";
+    const char* pluginAuthor = "Oliver Gruetzmann";
+    const char* pluginVersion = "0.2";
+    const char* pluginCopyright = "MIT License";
 }
 
 using namespace EuroScopePlugIn;
@@ -25,7 +25,10 @@ public:
     bool OnCompileCommand(const char* sCommandLine);
     void OnTimer(int counter);
 
+    void data_callback(const CURL_easy_handler::handle_type, const std::string data);
+    void message_callback(const std::string sender, const std::string message, bool flash = false, bool unread = false);
+
 private:
-    bool active { true };
+    bool active{ true };
     std::unique_ptr<Vectoraudio_socket> socket;
 };
