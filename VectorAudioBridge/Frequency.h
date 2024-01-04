@@ -4,7 +4,8 @@ struct Frequency {
     std::string name;
     std::string frequency;
 
-    friend constexpr bool operator==(const Frequency& lhs, const Frequency& rhs) {
+    friend constexpr bool operator==(const Frequency& lhs, const Frequency& rhs)
+    {
         return lhs.frequency == rhs.frequency && lhs.name == rhs.name;
     }
 };

@@ -24,9 +24,6 @@
     <ClInclude Include="Vectoraudio_Socket.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="Active_frequencies.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="include\curl\curl.h">
       <Filter>Headerdateien\Include</Filter>
     </ClInclude>
@@ -51,9 +48,6 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="Vectoraudio_Socket.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
-    <ClCompile Include="Active_frequencies.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="Status.cpp">

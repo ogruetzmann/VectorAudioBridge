@@ -1,14 +1,12 @@
 #pragma once
 #include <chrono>
 using namespace std::chrono_literals;
-class Status
-{
+class Status {
 public:
-    bool connection { false };
-    bool error{ false };
-    std::chrono::system_clock::duration interval{ 5s };
+    bool connection { true };
+    bool error { false };
+    std::chrono::system_clock::duration interval { 200ms };
 
     void connected();
     void disconnected();
 };
-

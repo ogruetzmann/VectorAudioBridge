@@ -161,7 +161,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\AppData\Roaming\EuroScope\PlugIn\EuroScopePlugIn.h" />
-    <ClInclude Include="Active_frequencies.h" />
     <ClInclude Include="CURL_easy_handler.h" />
     <ClInclude Include="Frequency.h" />
     <ClInclude Include="Helpers.h" />
@@ -171,7 +170,6 @@
     <ClInclude Include="Vectoraudio_Socket.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Active_frequencies.cpp" />
     <ClCompile Include="CURL_easy_handler.cpp" />
     <ClCompile Include="Helpers.cpp" />
     <ClCompile Include="Status.cpp" />
