@@ -14,7 +14,6 @@ public:
 
     CURL_easy_handler(const handle_type t, const std::string& url);
     ~CURL_easy_handler();
-    friend constexpr bool operator==(const CURL_easy_handler& lhs, const CURL_easy_handler& rhs);
 
     CURL* get_handle() const;
     const std::string get_response();

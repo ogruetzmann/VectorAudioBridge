@@ -5,12 +5,12 @@ Vectoraudio_bridge::Vectoraudio_bridge()
 {
     try {
         socket = std::make_unique<Vectoraudio_socket>();
+        using namespace std::placeholders;
+        socket->register_data_callback(std::bind(&Vectoraudio_bridge::data_callback, this, _1, _2));
+        socket->register_message_callback(std::bind(&Vectoraudio_bridge::message_callback, this, _1, _2, _3, _4));
     } catch (std::exception& e) {
         display_message(e.what());
     }
-    using namespace std::placeholders;
-    socket->register_data_callback(std::bind(&Vectoraudio_bridge::data_callback, this, _1, _2));
-    socket->register_message_callback(std::bind(&Vectoraudio_bridge::message_callback, this, _1, _2, _3, _4));
 }
 
 Vectoraudio_bridge::~Vectoraudio_bridge()
@@ -62,7 +62,8 @@ void Vectoraudio_bridge::OnTimer(int counter)
 
 void Vectoraudio_bridge::data_callback(const CURL_easy_handler::handle_type type, const std::string data)
 {
-    if (type == CURL_easy_handler::handle_type::rx || type == CURL_easy_handler::handle_type::tx) {
+    using hnd_type = CURL_easy_handler::handle_type;
+    if (type == hnd_type::rx || type == hnd_type::tx) {
         std::vector<Frequency> frequencies;
         auto res = helpers::tokenize(data, ',');
         for (const auto& x : res) {
@@ -71,10 +72,10 @@ void Vectoraudio_bridge::data_callback(const CURL_easy_handler::handle_type type
                 frequencies.push_back({ res2[0], res2[1] });
             }
         }
-        set_frequencies(frequencies, type == CURL_easy_handler::handle_type::tx ? true : false);
+        set_frequencies(frequencies, type == hnd_type::tx ? true : false);
     }
 
-    if (type == CURL_easy_handler::handle_type::active) {
+    if (type == hnd_type::active) {
 
     }
 }

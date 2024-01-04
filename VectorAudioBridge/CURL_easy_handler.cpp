@@ -72,11 +72,6 @@ void CURL_easy_handler::init(const std::string& url)
 #endif
 }
 
-constexpr bool operator==(const CURL_easy_handler& lhs, const CURL_easy_handler& rhs)
-{
-    return lhs.curl == rhs.curl;
-}
-
 size_t write_callback(char* ptr, size_t size, size_t nmemb, std::string* userdata)
 {
     if (userdata == nullptr)

@@ -8,7 +8,6 @@
 #include <stop_token>
 #include <string>
 #include <thread>
-#include <utility>
 #include <vector>
 
 using namespace std::chrono_literals;
@@ -22,19 +21,16 @@ public:
 
     const bool has_error() const;
     void poll();
+    void start();
+    void stop();
 
     void register_data_callback(data_callback_t callback);
     void register_message_callback(message_callback_t callback);
 
 private:
     Status status;
-    bool error_state { false };
-    bool connected { false };
-    std::string last_error;
-
     std::vector<std::unique_ptr<CURL_easy_handler>> handles;
     CURLM* curlm { nullptr };
-
     const std::string rx_url { "http://localhost:49080/rx" };
     const std::string tx_url { "http://localhost:49080/tx" };
     const std::string version_url { "http://localhost:49080/" };

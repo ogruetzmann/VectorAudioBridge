@@ -1,12 +1,14 @@
 #pragma once
+#include "Frequency.h"
 #include "Helpers.h"
 #include "Vectoraudio_Socket.h"
-#include "Frequency.h"
-#include <EuroScopePlugIn.h>
 #include <functional>
 #include <memory>
 #include <string>
 #include <string_view>
+
+#include <Windows.h>
+#include <EuroScopePlugIn.h>
 
 using frequency_pairs = std::vector<Frequency>;
 

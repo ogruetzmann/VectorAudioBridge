@@ -3,18 +3,13 @@
 Vectoraudio_socket::Vectoraudio_socket()
 {
     init_curl();
-    init_handles();
-    std::jthread worker(std::bind_front(&Vectoraudio_socket::run, this), 200);
-    worker_stop = worker.get_stop_source();
-    worker.detach();
+    start();
 }
 
 Vectoraudio_socket::~Vectoraudio_socket()
 {
     worker_stop.request_stop();
-    for (auto& x : handles)
-        curl_multi_remove_handle(curlm, x.get()->get_handle());
-    handles.clear();
+    stop();
     curl_multi_cleanup(curlm);
     curl_global_cleanup();
 }
@@ -26,7 +21,7 @@ const bool Vectoraudio_socket::has_error() const
 
 void Vectoraudio_socket::poll()
 {
-    if (error_state)
+    if (status.error)
         return;
 
     CURLMsg* msg { nullptr };
@@ -43,6 +38,24 @@ void Vectoraudio_socket::poll()
 
     int runningHandles { 0 };
     curl_multi_perform(curlm, &runningHandles);
+}
+
+void Vectoraudio_socket::start()
+{
+    init_handles();
+    for (auto& x : handles)
+        curl_multi_add_handle(curlm, x.get()->get_handle());
+    std::jthread worker(std::bind_front(&Vectoraudio_socket::run, this), 200);
+    worker_stop = worker.get_stop_source();
+    worker.detach();
+}
+
+void Vectoraudio_socket::stop()
+{
+    worker_stop.request_stop();
+    for (auto& x : handles)
+        curl_multi_remove_handle(curlm, x.get()->get_handle());
+    handles.clear();
 }
 
 void Vectoraudio_socket::register_data_callback(data_callback_t callback)
@@ -84,29 +97,6 @@ void Vectoraudio_socket::handle_reply(CURL* handle)
     status.connected();
 }
 
-// frequency_pairs Vectoraudio_socket::parse_reply(std::string_view reply) const
-//{
-//     std::vector<Frequency> freqs;
-//     if (!reply.size())
-//         return freqs;
-//
-//     constexpr char reply_sep = ',';
-//     constexpr char pos_sep = ':';
-//     auto begin = reply.begin();
-//     auto end = reply.begin();
-//     do {
-//         end = std::find(begin, reply.end(), reply_sep);
-//         std::string_view token = std::string_view(begin, end);
-//
-//         auto pos = std::find(token.begin(), token.end(), pos_sep);
-//         freqs.push_back({ std::string { token.begin(), pos }, std::string { pos + 1, token.end() } });
-//
-//         if (end != reply.end())
-//             begin = ++end;
-//     } while (end != reply.end());
-//     return freqs;
-// }
-
 void Vectoraudio_socket::init_curl()
 {
     CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
@@ -123,8 +113,6 @@ void Vectoraudio_socket::init_handles()
     handles.push_back(std::make_unique<CURL_easy_handler>(CURL_easy_handler::handle_type::rx, rx_url));
     handles.push_back(std::make_unique<CURL_easy_handler>(CURL_easy_handler::handle_type::tx, tx_url));
     handles.push_back(std::make_unique<CURL_easy_handler>(CURL_easy_handler::handle_type::active, active_url));
-    for (auto& x : handles)
-        curl_multi_add_handle(curlm, x.get()->get_handle());
 }
 
 size_t write_cb(char* ptr, size_t size, size_t nmemb, std::string* userdata)
