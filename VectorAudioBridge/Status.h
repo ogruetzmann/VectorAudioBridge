@@ -7,6 +7,6 @@ public:
     bool error { false };
     std::chrono::system_clock::duration interval { 200ms };
 
-    void connected();
-    void disconnected();
+    void connected() noexcept;
+    void disconnected() noexcept;
 };

@@ -19,7 +19,7 @@ public:
     Vectoraudio_socket();
     ~Vectoraudio_socket();
 
-    const bool has_error() const;
+    const bool has_error() const noexcept;
     void poll();
     void start();
     void stop();
@@ -36,6 +36,7 @@ private:
     const std::string version_url { "http://localhost:49080/" };
     const std::string active_url { "http://localhost:49080/transmitting" };
 
+    std::jthread worker;
     std::stop_source worker_stop;
     message_callback_t message_callback;
     data_callback_t data_callback;
@@ -46,5 +47,3 @@ private:
     void init_curl();
     void init_handles();
 };
-
-size_t write_cb(char*, size_t, size_t, std::string*);

@@ -8,7 +8,8 @@ Vectoraudio_bridge::Vectoraudio_bridge()
         using namespace std::placeholders;
         socket->register_data_callback(std::bind(&Vectoraudio_bridge::data_callback, this, _1, _2));
         socket->register_message_callback(std::bind(&Vectoraudio_bridge::message_callback, this, _1, _2, _3, _4));
-    } catch (std::exception& e) {
+    }
+    catch (const std::exception& e) {
         display_message(e.what());
     }
 }
@@ -24,12 +25,16 @@ void Vectoraudio_bridge::display_message(std::string_view msg)
 
 void Vectoraudio_bridge::set_frequencies(const frequency_pairs& pairs, const bool tx)
 {
-    for (auto gac = EuroScopePlugIn::CPlugIn::GroundToArChannelSelectFirst(); gac.IsValid(); gac = EuroScopePlugIn::CPlugIn::GroundToArChannelSelectNext(gac)) {
+    std::lock_guard<std::mutex> lock(freq_set_mutex);
+    for (auto gac = EuroScopePlugIn::CPlugIn::GroundToArChannelSelectFirst(); gac.IsValid();
+         gac = EuroScopePlugIn::CPlugIn::GroundToArChannelSelectNext(gac)) {
         std::string frequency = std::to_string(gac.GetFrequency());
         std::string_view name = gac.GetName();
 
         bool found { false };
-        auto compare = [&](Frequency p) { return name.starts_with(p.name) && frequency.starts_with(p.frequency); };
+        auto compare = [&](Frequency p) {
+            return name.starts_with(p.name) && frequency.starts_with(p.frequency);
+        };
         if (std::find_if(pairs.begin(), pairs.end(), compare) != pairs.end())
             found = true;
 
@@ -44,19 +49,19 @@ bool Vectoraudio_bridge::OnCompileCommand(const char* sCommandLine)
 {
     std::string_view cmd = sCommandLine;
     if (cmd == ".vab start") {
-        active = true;
+        socket.get()->start();
         display_message("Brigde active");
         return true;
     }
     if (cmd == ".vab stop") {
+        socket.get()->stop();
         display_message("Brigde inactive");
-        active = false;
         return true;
     }
     return false;
 }
 
-void Vectoraudio_bridge::OnTimer(int counter)
+void Vectoraudio_bridge::OnTimer(int counter) noexcept
 {
 }
 
@@ -69,14 +74,13 @@ void Vectoraudio_bridge::data_callback(const CURL_easy_handler::handle_type type
         for (const auto& x : res) {
             auto res2 = helpers::tokenize(x, ':');
             if (res2.size() == 2) {
-                frequencies.push_back({ res2[0], res2[1] });
+                frequencies.push_back({ res2.at(0), res2.at(1) });
             }
         }
         set_frequencies(frequencies, type == hnd_type::tx ? true : false);
     }
 
-    if (type == hnd_type::active) {
-
+    else if (type == hnd_type::active) {
     }
 }
 
@@ -85,14 +89,12 @@ void Vectoraudio_bridge::message_callback(const std::string sender, const std::s
     DisplayUserMessage("VectorAudioBridge", sender.c_str(), message.c_str(), true, unread, true, flash, false);
 }
 
-std::unique_ptr<EuroScopePlugIn::CPlugIn> plugin;
-
 void EuroScopePlugInInit(EuroScopePlugIn::CPlugIn** ppPlugInInstance)
 {
-    plugin.reset(new Vectoraudio_bridge);
-    *ppPlugInInstance = plugin.get();
+    plugin = std::make_unique<Vectoraudio_bridge>();
 }
 
 void EuroScopePlugInExit(void)
 {
+    plugin.reset(nullptr);
 }
